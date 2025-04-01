@@ -1,0 +1,38 @@
+name: Salesforce Code Checks
+
+on:
+  pull_request:
+    branches:
+      - master  # Change to your target branch
+
+jobs:
+  code_checks:
+    name: Run Prettier, ESLint, and SFDX Scanner
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Prettier (Check Formatting)
+        run: npx prettier --check "**/*.{js,ts,cls,html,css,json,md}"
+
+      - name: Run ESLint (Code Analyzer)
+        run: npx eslint . --ext .js,.ts --max-warnings=0
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global sfdx-cli
+          sfdx --version
+
+      - name: Run Salesforce Code Scanner (PMD)
+        run: |
+          sfdx scanner:run --target "force-app" --format table
